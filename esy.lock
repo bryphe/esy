@@ -594,7 +594,7 @@
 
 "@opam/ppx_derivers@ >= 1.0.0", "@opam/ppx_derivers@*":
   version "1.0.0"
-  uid "8f34e516ed653f2d9d6fbae0d01e64d8"
+  uid "9a473fcbc90d0e2716008fca78704eaa"
   resolved "@opam/ppx_derivers@1.0.0-8f34e516ed653f2d9d6fbae0d01e64d8.tgz"
   dependencies:
     "@esy-ocaml/esy-installer" "^0.0.0"

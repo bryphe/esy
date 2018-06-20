@@ -1,5 +1,5 @@
 {
-  "name": "esy",
+  "name": "@bryphe/esy",
   "version": "0.1.19",
   "license": "MIT",
   "description": "Esy sandboxes for compiled languages",
