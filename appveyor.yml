@@ -8,6 +8,7 @@ install:
 
 build_script:
     - cygwin-bash make bootstrap
+    - cygwin-bash make bootstrap
     - cygwin-bash make build-release
 
 test: off
