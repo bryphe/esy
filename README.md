@@ -2,6 +2,7 @@
 
 `package.json` workflow for native development with Reason/OCaml.
 
+[![Build Status](https://ci.appveyor.com/api/projects/status/mxo7tduuto7dfsr5?svg=true)](https://ci.appveyor.com/project/bryphe/esy-cygwin/branch/master)
 [![Travis](https://img.shields.io/travis/esy/esy.svg)](https://travis-ci.org/esy/esy)
 [![npm](https://img.shields.io/npm/v/esy.svg)](https://www.npmjs.com/package/esy)
 [![npm (tag)](https://img.shields.io/npm/v/esy/next.svg)](https://www.npmjs.com/package/esy)
