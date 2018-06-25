@@ -67,7 +67,7 @@ let withProcess ?(env=`CurrentEnv) ?(resolveProgramInEnv=false) ?stdin ?stdout ?
           resolveCmdInEnv ~env prg
         | _ -> Ok prg
       in
-      return (prg, Array.of_list (prg::args))
+      return ("", Array.of_list (prg::args))
     ) in
 
   let env = Option.map env ~f:(fun env -> env
@@ -88,12 +88,13 @@ let withProcess ?(env=`CurrentEnv) ?(resolveProgramInEnv=false) ?stdin ?stdout ?
 
 let run ?env ?resolveProgramInEnv ?stdin ?stdout ?stderr cmd =
   let open RunAsync.Syntax in
+  let cmdString = Cmd.toString cmd in
+  Printf.printf "ChildProcess::run - cmd %s\n" cmdString;
   let f process =
     match%lwt process#status with
     | Unix.WEXITED 0 -> return ()
     | _ ->
-      let cmd = Cmd.toString cmd in
-      let msg = Printf.sprintf "error running command: %s" cmd in
+      let msg = Printf.sprintf "error running command: %s" cmdString in
       error msg
   in
   withProcess ?env ?resolveProgramInEnv ?stdin ?stdout ?stderr cmd f
