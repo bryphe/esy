@@ -132,7 +132,6 @@ RELEASE_FILES = \
 
 build-release:
 	@$(MAKE) build
-	@$(MAKE) -C linux-build build
 	@$(MAKE) build-release-copy-artifacts
 
 build-release-copy-artifacts:
