@@ -69,14 +69,14 @@ doctoc:
 	@$(BIN)/doctoc --notitle ./README.md
 
 clean:
-	@esy jbuilder clean
+	@jbuilder clean
 
 build:
-	@esy b jbuilder build -j 4 $(TARGETS)
+	@jbuilder build -j 4 $(TARGETS)
 
 b: build-dev
 build-dev:
-	@esy b jbuilder build -j 4 --dev $(TARGETS)
+	@jbuilder build -j 4 --dev $(TARGETS)
 
 #
 # Test
@@ -85,7 +85,7 @@ build-dev:
 JEST = $(BIN)/jest --runInBand
 
 test-unit::
-	@esy b jbuilder build --dev @runtest
+	@jbuilder build --dev @runtest
 
 test-e2e::
 	@make -C test-e2e test
