@@ -56,6 +56,7 @@ let create
   ~prefixPath (sandboxPath : Path.t) =
   let value =
     let open Result.Syntax in
+    Printf.printf("Config::create\n");
 
     let%bind prefixPath =
       match prefixPath with
@@ -64,6 +65,10 @@ let create
         let%bind home = Bos.OS.Dir.user() in
         Ok Path.(home / ".esy")
     in
+    
+    let prefixPathString = Fpath.to_string prefixPath in
+
+    Printf.printf "Prefix path: %s\n" prefixPathString;
 
     let%bind storePath =
       let%bind storePadding =
@@ -169,6 +174,7 @@ end = struct
       | _ -> None
     in
     let path = EsyBuildPackage.PathSyntax.renderExn env (Path.to_string p) in
+    Printf.printf "Hello test %s" path;
     match Path.of_string path with
     | Ok path -> path
     | Error (`Msg msg) ->
