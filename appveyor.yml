@@ -3,11 +3,7 @@ platform:
     - x64
 
 install:
-    - npm install
-
-environment:
-  NPM_TOKEN:
-    secure: pNdFuPuA8RB67Dxjn4u/Om+NoCy851jnz+YDTflZgej0LIT/+HC0r545wgS5msIr
+    - npm install esy-cygwin
 
 build_script:
     - npm build-bootstrapped-windows
