@@ -1,9 +1,10 @@
 type system =
   | Darwin
   | Linux
+  | Windows
   | Cygwin
   | Other
-
+  
 let uname () =
   let ic = Unix.open_process_in("uname") in
   let uname = input_line(ic) in
@@ -13,4 +14,11 @@ let uname () =
   | "darwin" -> Darwin
   | _ -> Other
 
-let host = uname ()
+let gethost () =
+   match Sys.os_type with
+   | "Unix" -> uname ()
+   | "Win32" -> Windows
+   | "Cygwin" -> Cygwin
+   | _ -> Other
+
+let host = gethost ()
