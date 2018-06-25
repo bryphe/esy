@@ -10,5 +10,6 @@ build_script:
     - cygwin-bash make bootstrap
     - cygwin-bash make bootstrap
     - cygwin-bash make build-release
+    - npm install -g _release
 
 test: off
