@@ -4,12 +4,12 @@
   "license": "MIT",
   "description": "Esy sandboxes for compiled languages",
   "dependencies": {
-    "@bryphe/esy-solve-cudf": "^0.0.3",
     "@esy-ocaml/esy-opam": "0.0.15",
     "esy-cygwin": "^0.1.0"
   },
   "scripts": {
-    "build-bootstrapped-windows": "echo TODO",
+    "install-cygwin": "cygwin-bash ./bootstrap-windows-install-opam-dependencies.sh",
+    "build-cygwin": "cygwin-bash make bootstrap && cygwin-bash make bootstrap && cygwin-bash make build-release",
     "postinstall": "bash ./scripts/postinstall.sh"
   },
   "repository": {

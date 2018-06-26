@@ -4,8 +4,10 @@ platform:
 
 install:
     - npm install esy-cygwin
+    - npm run install-cygwin
 
 build_script:
-    - npm build-bootstrapped-windows
+    - npm run build-cygwin
+    - npm install -g _release
 
 test: off
