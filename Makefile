@@ -57,7 +57,6 @@ bootstrap:
 ifndef ESY_EXT
 	$(error "esy command is not avaialble, run 'npm install -g esy'")
 endif
-	@esy install
 	@make -C esy-install bootstrap
 	@make build-dev
 	@make -C test-e2e bootstrap
@@ -128,24 +127,19 @@ build-release:
 	@$(MAKE) build-release-copy-artifacts
 
 build-release-copy-artifacts:
-	@rm -rf $(RELEASE_ROOT)
 	@$(MAKE) -j $(RELEASE_FILES:%=$(RELEASE_ROOT)/%)
 
 $(RELEASE_ROOT)/_build/default/esy/bin/esyCommand.exe:
 	@mkdir -p $(@D)
 	@cp _build/default/esy/bin/esyCommand.exe $(@)
 
-$(RELEASE_ROOT)/_build/default/esy-build-package/bin/esyBuildPackageCommand-darwin.exe:
+$(RELEASE_ROOT)/_build/default/esy-build-package/bin/esyBuildPackageCommand.exe:
 	@mkdir -p $(@D)
 	@cp _build/default/esy-build-package/bin/esyBuildPackageCommand.exe $(@)
 
 $(RELEASE_ROOT)/_build/default/esyi/bin/esyi-darwin.exe:
 	@mkdir -p $(@D)
 	@cp _build/default/esyi/bin/esyi.exe $(@)
-
-$(RELEASE_ROOT)/_build/default/esy-build-package/bin/esyBuildPackageCommand.exe:
-	@mkdir -p $(@D)
-	@touch $(@)
 
 $(RELEASE_ROOT)/_build/default/esyi/bin/esyi.exe:
 	@mkdir -p $(@D)
