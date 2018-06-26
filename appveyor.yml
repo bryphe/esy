@@ -4,12 +4,10 @@ platform:
 
 install:
     - npm install esy-cygwin
-    - cygwin-bash ./bootstrap-windows-install-opam-dependencies.sh
+    - npm install-cygwin
 
 build_script:
-    - cygwin-bash make bootstrap
-    - cygwin-bash make bootstrap
-    - cygwin-bash make build-release
+    - npm build-cygwin
     - npm install -g _release
 
 test: off
