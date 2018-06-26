@@ -118,7 +118,6 @@ RELEASE_FILES = \
 	bin/esyInstallRelease.js \
 	scripts/postinstall.sh \
 	package.json \
-	_build/default/esy-build-package/bin/esyBuildPackageCommand-darwin.exe \
 	_build/default/esy-build-package/bin/esyBuildPackageCommand.exe \
 	_build/default/esy/bin/esyCommand.exe
 
