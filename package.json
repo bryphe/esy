@@ -5,7 +5,7 @@
   "description": "Esy sandboxes for compiled languages",
   "dependencies": {
     "@esy-ocaml/esy-opam": "0.0.15",
-    "esy-cygwin": "^0.1.0"
+    "esy-bash": "^0.1.7"
   },
   "scripts": {
     "install-cygwin": "cygwin-bash ./bootstrap-windows-install-opam-dependencies.sh",
