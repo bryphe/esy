@@ -1,3 +1,12 @@
+ let testReplace str =
+    let slashRegex = Str.regexp "\\\\" in
+    let replacedString = Str.global_replace slashRegex "/" str in
+    replacedString;;
+
+ let replaced = testReplace "C:\\test\\test2" in
+ Printf.printf "hello: %s\n" replaced;;
+ print_endline("TESTING");;
+
 include ShellParamExpansionParser
 
 let parse_exn v =
@@ -18,6 +27,7 @@ let parse src =
 
 type scope = string -> string option
 
+
 let render ?(fallback=Some "") ~(scope : scope) v =
   let open Run.Syntax in
   let%bind tokens = parse v in
@@ -32,4 +42,4 @@ let render ?(fallback=Some "") ~(scope : scope) v =
       end
   in
   let%bind segments = Result.List.foldLeft ~f ~init:[] tokens in
-  Ok (segments |> List.rev |> String.concat "")
+  Ok (segments |> List.rev |> String.concat "" |> testReplace)
