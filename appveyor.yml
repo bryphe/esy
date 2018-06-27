@@ -4,10 +4,10 @@ platform:
 
 install:
     - npm install esy-cygwin
-    - npm run install-cygwin
+    - npm run install-deps
 
 build_script:
-    - npm run build-cygwin
+    - npm run build
     - npm install -g _release
 
 test: off
