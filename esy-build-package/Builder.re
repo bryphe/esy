@@ -1,15 +1,31 @@
 module Path = EsyLib.Path;
 module Option = EsyLib.Option;
+module BashCmd = EsyLib.BashCmd;
+
+/* BashCmd.run(["dir"]); */
+
+let regexp = Str.regexp("E:\\\\");
+let regexp2 = Str.regexp("C:\\\\");
+let brackets = Str.regexp("\\\\")
+
+let normalizePath = (path: string) => {
+    let replaceDrive = Str.global_replace(regexp, "/cygdrive/e/", path);
+    let replaceDrive2 = Str.global_replace(regexp2, "/cygdrive/c/", replaceDrive);
+    let replacedBrackets = Str.global_replace(brackets, "/", replaceDrive2);
+    replacedBrackets
+}
 
 let relocateSourcePath = (config: Config.t, task: BuildTask.t) => {
   let cmd =
     Bos.Cmd.(
       empty
+      % "node"
+      % "E:/esy-bash/bin/esy-bash.js"
       % config.rsyncCmd
       % "--quiet"
       % "--archive"
       % "--exclude"
-      % p(task.buildPath)
+      % normalizePath(p(task.buildPath))
       % "--exclude"
       % "node_modules"
       % "--exclude"
@@ -24,8 +40,8 @@ let relocateSourcePath = (config: Config.t, task: BuildTask.t) => {
        * origPath rather than the origPath itself into destPath, see "man rsync" for
        * details.
        */
-      % (Path.to_string(task.sourcePath) ++ "/")
-      % p(task.buildPath)
+      % (normalizePath(Path.to_string(task.sourcePath)) ++ "/")
+      % normalizePath(p(task.buildPath))
     );
   Bos.OS.Cmd.run(cmd);
 };
@@ -63,6 +79,7 @@ let withLock = (lockPath: Path.t, f) => {
 let commitBuildToStore = (config: Config.t, task: BuildTask.t) => {
   open Run;
   let rewritePrefixInFile = (~origPrefix, ~destPrefix, path) => {
+    Printf.printf("Builder::commitBuildToStore::rewritePrefixInFile path: %s\n", Fpath.to_string(path));
     let cmd =
       Bos.Cmd.(
         empty
@@ -188,6 +205,7 @@ let doNothing = (_config: Config.t, _spec: BuildTask.t) => Run.ok;
 let withBuildEnvUnlocked =
     (~commit=false, config: Config.t, task: BuildTask.t, f) => {
   open Run;
+  Printf.printf("Builder::withBuildEnvUnlocked\n");
   let {BuildTask.sourcePath, installPath, buildPath, stagePath, _} = task;
   let (rootPath, prepareRootPath, completeRootPath) =
     switch (task.buildType, task.sourceType) {
@@ -280,6 +298,7 @@ let withBuildEnvUnlocked =
    * Prepare build/install.
    */
   let prepare = () => {
+    let%bind () = Ok(Printf.printf("Builder::prepare\n"));
     let%bind () = rmdir(installPath);
     let%bind () = rmdir(stagePath);
     let%bind () = mkdir(stagePath);
@@ -304,6 +323,7 @@ let withBuildEnvUnlocked =
       };
     let%bind () = prepareRootPath(config, task);
     let%bind () = mkdir(buildPath / "_esy");
+    let%bind () = Ok(Printf.printf("Builder::prepared!\n"));
     ok;
   };
   /*
@@ -325,12 +345,15 @@ let withBuildEnvUnlocked =
       error;
     };
   let%bind () = prepare();
+  let%bind () = Ok(Printf.printf("Builder::finalize - before withCwd\n"));
   let result = withCwd(rootPath, ~f=f(run, runInteractive));
+  let%bind () = Ok(Printf.printf("Builder::finalize - after withCwd\n"));
   let%bind () = finalize(result);
   result;
 };
 
-let withBuildEnv = (~commit=false, config: Config.t, task: BuildTask.t, f) =>
+let withBuildEnv = (~commit=false, config: Config.t, task: BuildTask.t, f) => {
+  Printf.printf("Builder::withBuildEnv storePath: %s localStorePath: %s\n", Fpath.to_string(config.storePath), Fpath.to_string(config.localStorePath));
   Run.(
     {
       let%bind () = Store.init(config.storePath);
@@ -342,26 +365,38 @@ let withBuildEnv = (~commit=false, config: Config.t, task: BuildTask.t, f) =>
       };
     }
   );
+};
 
 let build =
     (~buildOnly=true, ~force=false, config: Config.t, task: BuildTask.t) => {
   open Run;
+  Printf.printf("Builder::build\n");
   Logs.debug(m => m("start %s", task.id));
   let performBuild = sourceModTime => {
+      Printf.printf("Builder::performBuild: %s@%s\n", task.name, task.version);
     Logs.debug(m => m("building"));
     Logs.app(m =>
       m("# esy-build-package: building: %s@%s", task.name, task.version)
     );
     let runBuildAndInstall = (run, _runInteractive, ()) => {
+      Printf.printf("Builder::build::runBuildAndInstall\n");
       let runList = cmds => {
         let rec _runList = cmds =>
           switch (cmds) {
           | [] => Ok()
           | [cmd, ...cmds] =>
+            let originalCommands = Bos.Cmd.to_list(cmd);
+            let sanitizedCommands = List.map(normalizePath, originalCommands);
+            let normalizedCommand = Bos.Cmd.of_list(sanitizedCommands);
+            /* Printf.printf("Buidler - stringcommand: %s\n", stringCommand); */
+
+            /* let normalizedCommand = Bos.Cmd.of_string(stringCommand); */
+           
+            Printf.printf("Builder::build:_runList: %s\n", Bos.Cmd.to_string(normalizedCommand));
             Logs.app(m =>
-              m("# esy-build-package: running: %s", Bos.Cmd.to_string(cmd))
+              m("# esy-build-package: running: %s", Bos.Cmd.to_string(normalizedCommand))
             );
-            switch (run(cmd)) {
+            switch (run(normalizedCommand)) {
             | Ok(_) => _runList(cmds)
             | Error(err) => Error(err)
             };
