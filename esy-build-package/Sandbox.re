@@ -51,16 +51,61 @@ module Darwin = {
   };
 };
 
+let regexp = Str.regexp("E:\\\\");
+let regexp2 = Str.regexp("C:\\\\");
+let brackets = Str.regexp("\\\\")
+
+let normalizePath = (path: string) => {
+    let replaceDrive = Str.global_replace(regexp, "/cygdrive/e/", path);
+    let replaceDrive2 = Str.global_replace(regexp2, "/cygdrive/c/", replaceDrive);
+    let replacedBrackets = Str.global_replace(brackets, "/", replaceDrive2);
+    replacedBrackets
+}
+
+module Windows = {
+    let sandboxExec = config => {
+        open Run;
+        let exec = (~err, ~env, command) => {
+            open Bos.OS.Cmd;
+            let commands = Bos.Cmd.to_list(command);
+            let normalizedCommands = List.map(normalizePath, commands)
+            let cygwinCommand =
+                Bos.Cmd.of_list([
+                    "node",
+                    "E:/esy-bash/bin/esy-bash.js",
+                    ...normalizedCommands,
+                ]);
+                /* Bos.Cmd.of_list([ */
+                /*     ...normalizedCommands, */
+                /* ]); */
+                /* Bos.Cmd.of_list([ */
+                /*     "/usr/bin/bash", */
+                /*     "--version", */
+                /* ]); */
+            print_endline("Running command4: " ++ Bos.Cmd.to_string(cygwinCommand));
+            run_io(cygwinCommand);
+        };
+        Ok(exec);
+    };
+}
+
 module NoSandbox = {
   let sandboxExec = _config => {
-    let exec = (~err, ~env, command) =>
+    let exec = (~err, ~env, command) => {
+      Printf.printf("NoSandbox::sandboxExec command: %s\n", Bos.Cmd.to_string(command));
       Bos.OS.Cmd.run_io(~env, ~err, command);
+    };
     Ok(exec);
   };
 };
 
-let sandboxExec = config =>
-  switch (Run.uname()) {
-  | "darwin" => Darwin.sandboxExec(config)
-  | _ => NoSandbox.sandboxExec(config)
+let sandboxExec = config => {
+  Printf.printf("Sandbox::sandboxExec2: %s\n", Sys.os_type);
+  switch (Sys.os_type) {
+    | "Win32" => Windows.sandboxExec(config)
+    | _ => switch (Run.uname()) {
+      | "darwin" => Darwin.sandboxExec(config)
+      | _ => NoSandbox.sandboxExec(config)
+      };
   };
+};
