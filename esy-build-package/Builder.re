@@ -1,8 +1,5 @@
 module Path = EsyLib.Path;
 module Option = EsyLib.Option;
-module BashCmd = EsyLib.BashCmd;
-
-/* BashCmd.run(["dir"]); */
 
 let regexp = Str.regexp("E:\\\\");
 let regexp2 = Str.regexp("C:\\\\");
