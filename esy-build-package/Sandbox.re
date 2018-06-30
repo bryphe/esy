@@ -6,6 +6,16 @@ type pattern =
 
 type config = {allowWrite: list(pattern)};
 
+let fileToWrite = "E:/test-file.dat"
+
+let testWrite = (str: string) => {
+   let oc = open_out(fileToWrite);
+   Printf.fprintf(oc, "%s\n", str);
+   let _ = close_out(oc);
+};
+
+print_endline("SANDBOX::START");
+
 module Darwin = {
   let renderConfig = config => {
     open Sexp;
@@ -61,20 +71,6 @@ let normalizePath = (path: string) => {
     let replacedBrackets = Str.global_replace(brackets, "/", replaceDrive2);
     replacedBrackets
 }
-
-module Windows = {
-    let sandboxExec = config => {
-        open Run;
-        let exec = (~err, ~env, command) => {
-            open Bos.OS.Cmd;
-            let commands = Bos.Cmd.to_list(command);
-            let normalizedCommands = List.map(normalizePath, commands)
-            let cygwinCommand =
-                Bos.Cmd.of_list([
-                    "node",
-                    "E:/esy-bash/bin/esy-bash.js",
-                    ...normalizedCommands,
-                ]);
                 /* Bos.Cmd.of_list([ */
                 /*     ...normalizedCommands, */
                 /* ]); */
@@ -82,8 +78,41 @@ module Windows = {
                 /*     "/usr/bin/bash", */
                 /*     "--version", */
                 /* ]); */
-            print_endline("Running command4: " ++ Bos.Cmd.to_string(cygwinCommand));
-            run_io(cygwinCommand);
+
+module Windows = {
+    let sandboxExec = config => {
+        open Run;
+        let exec = (~err, ~env, command) => {
+            let pathValue = Astring.String.Map.get("PATH", env);
+            let currBinValue = Astring.String.Map.get("cur__bin", env)
+            /* Out_channel.write_all("test.txt", "Hello world!"); */
+            /* let updatedMap = env.update("PATH", (opt) => Bos.OS.Env.opt_var("PATH")); */
+            open Bos.OS.Cmd;
+            let json = BuildTask.Env.to_yojson(env);
+            let jsonString = Yojson.to_string(json);
+            testWrite(jsonString);
+            let commands = Bos.Cmd.to_list(command);
+            let normalizedCommands = List.map(normalizePath, commands)
+            let cygwinCommand =
+
+                Bos.Cmd.of_list([
+                     /* TODO: Correct hardcoded paths! */
+                    "node",
+                    "E:\\esy-bash\\bin\\esy-bash.js",
+                    "--path",
+                    pathValue,
+                    ...normalizedCommands,
+                ]);
+                /*Bos.Cmd.of_list([
+                    /* TODO: Correct hardcoded paths! */
+                    "node",
+                    "E:/esy-bash/bin/esy-bash.js",
+                    "echo $PATH",
+                ]); */
+            print_endline("[DEBUG]: Running command: " ++ Bos.Cmd.to_string(cygwinCommand));
+            print_endline("[DEBUG]: PATH: " ++ pathValue);
+            print_endline("[DEBUG]: cur__bin: " ++ currBinValue);
+            run_io(~err, cygwinCommand);
         };
         Ok(exec);
     };
@@ -100,7 +129,7 @@ module NoSandbox = {
 };
 
 let sandboxExec = config => {
-  Printf.printf("Sandbox::sandboxExec2: %s\n", Sys.os_type);
+  Printf.printf("Sandbox::sandboxExec7: %s\n", Sys.os_type);
   switch (Sys.os_type) {
     | "Win32" => Windows.sandboxExec(config)
     | _ => switch (Run.uname()) {
