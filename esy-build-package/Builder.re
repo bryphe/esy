@@ -2,14 +2,24 @@ module Path = EsyLib.Path;
 module Option = EsyLib.Option;
 
 let relocateSourcePath = (config: Config.t, task: BuildTask.t) => {
+  open Run;
+
+  /* `rsync` is one utility that DOES NOT respect Windows paths.
+   *  Therefore, we need to normalize the paths to Cygwin-style (on POSIX systems, this is a no-op)
+   */
+  let%bind buildPath = EsyBash.normalizePathForCygwin(Bos.Cmd.p(task.buildPath));
+  let%bind sourcePath = EsyBash.normalizePathForCygwin(Path.to_string(task.sourcePath));
+
   let cmd =
     Bos.Cmd.(
       empty
+      % "node"
+      % "E:/esy-bash/bin/esy-bash.js"
       % config.rsyncCmd
       % "--quiet"
       % "--archive"
       % "--exclude"
-      % p(task.buildPath)
+      % buildPath
       % "--exclude"
       % "node_modules"
       % "--exclude"
@@ -24,8 +34,8 @@ let relocateSourcePath = (config: Config.t, task: BuildTask.t) => {
        * origPath rather than the origPath itself into destPath, see "man rsync" for
        * details.
        */
-      % (Path.to_string(task.sourcePath) ++ "/")
-      % p(task.buildPath)
+      % (sourcePath ++ "/")
+      % buildPath
     );
   Bos.OS.Cmd.run(cmd);
 };
@@ -346,6 +356,7 @@ let withBuildEnv = (~commit=false, config: Config.t, task: BuildTask.t, f) =>
 let build =
     (~buildOnly=true, ~force=false, config: Config.t, task: BuildTask.t) => {
   open Run;
+  Printf.printf("Builder::build\n");
   Logs.debug(m => m("start %s", task.id));
   let performBuild = sourceModTime => {
     Logs.debug(m => m("building"));
@@ -353,6 +364,7 @@ let build =
       m("# esy-build-package: building: %s@%s", task.name, task.version)
     );
     let runBuildAndInstall = (run, _runInteractive, ()) => {
+      Printf.printf("Builder::build::runBuildAndInstall\n");
       let runList = cmds => {
         let rec _runList = cmds =>
           switch (cmds) {

@@ -16,7 +16,7 @@ let renderCommandExpr ?name ~system ~scope expr =
     | System.Linux
     | System.Unix
     | System.Cygwin -> "/"
-    | System.Windows -> "\\"
+    | System.Windows -> "/"
   in
   let colon =
     match name, system with
@@ -310,6 +310,7 @@ let ofPackage
     (rootPkg : Package.t)
   =
 
+  print_endline("Task.ofPackage");
   let cache = Memoize.make ~size:200 () in
 
   let term =
@@ -319,6 +320,7 @@ let ofPackage
     in Option.orDefault ~default:"" term
   in
 
+  print_endline("term: " ^ term);
   let open Run.Syntax in
 
   let rec collectDependency
@@ -433,6 +435,8 @@ let ofPackage
       | true, _ -> Package.SourceType.Immutable
       | false, sourceType -> sourceType
     in
+
+    print_endline("Task.ofPackage - got to paths");
 
     let paths =
       let storePath =
@@ -752,6 +756,7 @@ let ofPackage
 
   and taskOfPackageCached ~(includeSandboxEnv: bool) (pkg : Package.t) =
     let v = Memoize.compute cache pkg.id (fun _ -> taskOfPackage ~includeSandboxEnv pkg) in
+    print_endline("taskOfPackageCached: " ^ pkg.id);
     let context =
       Printf.sprintf
         "processing package: %s@%s"
@@ -769,6 +774,7 @@ let buildEnv pkg =
   Ok (Environment.Closed.bindings task.env)
 
 let commandEnv (pkg : Package.t) =
+    print_endline("Task::commandEnv");
   let open Run.Syntax in
 
   let%bind task =
@@ -780,6 +786,7 @@ let commandEnv (pkg : Package.t) =
   in Ok (Environment.Closed.bindings task.env)
 
 let sandboxEnv (pkg : Package.t) =
+    print_endline("Task::sandboxEnv");
   let open Run.Syntax in
   let devDependencies =
     pkg.dependencies

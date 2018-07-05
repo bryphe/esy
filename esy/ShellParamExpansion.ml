@@ -1,10 +1,16 @@
 include ShellParamExpansionParser
 
+let testReplace str =
+   let slashRegex = Str.regexp "\\\\" in
+   let replacedString = Str.global_replace slashRegex "/" str in
+   replacedString;;
+
 let parse_exn v =
   let lexbuf = Lexing.from_string v in
   read [] `Init lexbuf
 
 let parse src =
+    print_endline("ShellParamExpansion::parse " ^ src);
   try Ok (parse_exn src)
   with
   | UnmatchedChar (pos, _) ->
@@ -32,4 +38,4 @@ let render ?(fallback=Some "") ~(scope : scope) v =
       end
   in
   let%bind segments = Result.List.foldLeft ~f ~init:[] tokens in
-  Ok (segments |> List.rev |> String.concat "")
+  Ok (segments |> List.rev |> String.concat "" |> testReplace)

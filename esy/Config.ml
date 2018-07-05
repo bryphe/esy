@@ -54,6 +54,7 @@ let create
   ~esyInstallJsCommand
   ~esyVersion
   ~prefixPath (sandboxPath : Path.t) =
+      print_endline("esyInstallJsCommand: " ^ esyInstallJsCommand);
   let value =
     let open Result.Syntax in
 

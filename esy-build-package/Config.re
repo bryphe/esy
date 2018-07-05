@@ -5,6 +5,7 @@ type t = {
   localStorePath: Fpath.t,
   rsyncCmd: string,
   fastreplacestringCmd: string,
+  esyBashCmd: string,
 };
 
 let storeInstallTree = "i";
@@ -50,8 +51,9 @@ let create =
       ~sandboxPath,
       ~rsyncCmd="rsync",
       ~fastreplacestringCmd="fastreplacestring.exe",
+      ~esyBashCmd="esy-bash.cmd",
       (),
-    ) =>
+    ) => {
   Run.(
     {
       let%bind prefixPath =
@@ -80,6 +82,8 @@ let create =
         localStorePath,
         fastreplacestringCmd,
         rsyncCmd,
+        esyBashCmd,
       });
     }
   );
+    };

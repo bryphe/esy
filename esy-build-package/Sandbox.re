@@ -6,6 +6,13 @@ type pattern =
 
 type config = {allowWrite: list(pattern)};
 
+let brackets = Str.regexp("\\\\");
+
+let normalizePath = (path: string) => {
+    let replacedBrackets = Str.global_replace(brackets, "/", path);
+    replacedBrackets
+}
+
 module Darwin = {
   let renderConfig = config => {
     open Sexp;
@@ -51,6 +58,39 @@ module Darwin = {
   };
 };
 
+module Windows = {
+    let sandboxExec = config => {
+        open Run;
+        let exec = (~err, ~env, command) => {
+            let currBinValue = Astring.String.Map.get("cur__bin", env)
+            /* Out_channel.write_all("test.txt", "Hello world!"); */
+            /* let updatedMap = env.update("PATH", (opt) => Bos.OS.Env.opt_var("PATH")); */
+            open Bos.OS.Cmd;
+            let json = BuildTask.Env.to_yojson(env);
+            let jsonString = Yojson.to_string(json);
+            /* testWrite(jsonString); */
+            let commands = Bos.Cmd.to_list(command);
+            let normalizedCommands = List.map(normalizePath, commands)
+            let cygwinCommand = Bos.Cmd.of_list([
+                    "node",
+                    "E:\\esy-bash\\bin\\esy-bash.js",
+                    /* "--env", */
+                    /* "E:/test-file.dat", */
+                    ...normalizedCommands,
+                ]);
+                /*Bos.Cmd.of_list([
+                    /* TODO: Correct hardcoded paths! */
+                    "node",
+                    "E:/esy-bash/bin/esy-bash.js",
+                    "echo $PATH",
+                ]); */
+            print_endline("[DEBUG]: Running command: " ++ Bos.Cmd.to_string(cygwinCommand));
+            run_io(~err, cygwinCommand);
+        };
+        Ok(exec);
+    };
+}
+
 module NoSandbox = {
   let sandboxExec = _config => {
     let exec = (~err, ~env, command) =>
@@ -59,8 +99,13 @@ module NoSandbox = {
   };
 };
 
-let sandboxExec = config =>
-  switch (Run.uname()) {
-  | "darwin" => Darwin.sandboxExec(config)
-  | _ => NoSandbox.sandboxExec(config)
+let sandboxExec = config => {
+  Printf.printf("Sandbox::sandboxExec7: %s\n", Sys.os_type);
+  switch (Sys.os_type) {
+    | "Win32" => Windows.sandboxExec(config)
+    | _ => switch (Run.uname()) {
+      | "darwin" => Darwin.sandboxExec(config)
+      | _ => NoSandbox.sandboxExec(config)
+      };
   };
+};

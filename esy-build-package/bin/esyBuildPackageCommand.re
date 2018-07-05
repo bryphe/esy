@@ -4,6 +4,8 @@ module BuildTask = EsyBuildPackage.BuildTask;
 module File = Bos.OS.File;
 module Dir = Bos.OS.Dir;
 
+print_endline("ESY-BUILD-PACKAGE");
+
 type verb =
   | Normal
   | Quiet

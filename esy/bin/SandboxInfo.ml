@@ -8,6 +8,7 @@ type t = {
 }
 
 let cachePath (cfg : Config.t) =
+  print_endline("cachePath: " ^ Fpath.to_string(cfg.storePath));
   let hash = [
     Path.to_string cfg.storePath;
     Path.to_string cfg.localStorePath;
@@ -85,6 +86,7 @@ let writeCache (cfg : Config.t) (info : t) =
   in Esy.Perf.measureTime ~label:"writing sandbox info cache" f
 
 let readCache (cfg : Config.t) =
+  print_endline("SandboxInfo::readCache");
   let open RunAsync.Syntax in
   let f () =
     let cachePath = cachePath cfg in
@@ -112,6 +114,7 @@ let readCache (cfg : Config.t) =
   in Esy.Perf.measureTime ~label:"reading sandbox info cache" f
 
 let ofConfig (cfg : Config.t) =
+    print_endline("SandboxInfo::ofConfig");
   let open RunAsync.Syntax in
   let makeInfo () =
     let f () =

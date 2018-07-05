@@ -14,7 +14,9 @@ let warn msg =
 
 let error msg =
   let line = Chalk.red("[ERR]") ^ " " ^ msg in
-  print_endline line
+  print_endline line;;
+
+print_endline "SANITY CHECK";;
 
 (**
  * This module encapsulates info about esy runtime - its version, current
@@ -53,6 +55,7 @@ module EsyRuntime = struct
   let esyInstallJsCommand =
     resolveCommand "../../../../bin/esy-install.js"
 
+
   let fastreplacestringCommand =
     resolveCommand "../../../../bin/fastreplacestring"
 
@@ -60,7 +63,7 @@ module EsyRuntime = struct
     resolveCommand "../../esy-build-package/bin/esyBuildPackageCommand.exe"
 
   let esyInstallRelease =
-    resolve "../../../../bin/esyInstallRelease.js"
+      resolve "../../../../bin/esyInstallRelease.js";;
 
   module EsyPackageJson = struct
     type t = {
@@ -286,6 +289,7 @@ let build ?(buildOnly=true) cfg cmd =
   let%bind {SandboxInfo. task; _} = SandboxInfo.ofConfig cfg in
 
   (** TODO: figure out API to build devDeps in parallel with the root *)
+  print_endline("esyCommand::build");
 
   match cmd with
   | None ->
@@ -635,8 +639,8 @@ let () =
     let work () =
       let%lwt () = match header with
         | `Standard -> begin match Cmdliner.Term.name info with
-            | "esy" -> Logs_lwt.app (fun m -> m "esy %s" EsyRuntime.version)
-            | name -> Logs_lwt.app (fun m -> m "esy %s %s" name EsyRuntime.version);
+            | "esy" -> Logs_lwt.app (fun m -> m "esy1 %s" EsyRuntime.version)
+            | name -> Logs_lwt.app (fun m -> m "esy2 %s %s" name EsyRuntime.version);
           end
         | `No -> Lwt.return ()
       in
@@ -689,6 +693,7 @@ let () =
   in
 
   let buildCommand =
+      print_endline("buildCommand\n");
     let doc = "Build the entire sandbox" in
     let info = Term.info "build" ~version:EsyRuntime.version ~doc ~sdocs ~exits in
     let cmd cfg cmd () =
