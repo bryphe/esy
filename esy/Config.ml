@@ -57,6 +57,7 @@ let create
   let value =
     let open Result.Syntax in
     Printf.printf("Config::create\n");
+    Printf.printf("-- build package command: %s\n");
 
     let%bind prefixPath =
       match prefixPath with
@@ -174,7 +175,6 @@ end = struct
       | _ -> None
     in
     let path = EsyBuildPackage.PathSyntax.renderExn env (Path.to_string p) in
-    Printf.printf "Hello test %s" path;
     match Path.of_string path with
     | Ok path -> path
     | Error (`Msg msg) ->

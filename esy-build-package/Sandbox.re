@@ -14,7 +14,7 @@ let testWrite = (str: string) => {
    let _ = close_out(oc);
 };
 
-print_endline("SANDBOX::START");
+print_endline("SANDBOX::START2");
 
 module Darwin = {
   let renderConfig = config => {
@@ -83,7 +83,6 @@ module Windows = {
     let sandboxExec = config => {
         open Run;
         let exec = (~err, ~env, command) => {
-            let pathValue = Astring.String.Map.get("PATH", env);
             let currBinValue = Astring.String.Map.get("cur__bin", env)
             /* Out_channel.write_all("test.txt", "Hello world!"); */
             /* let updatedMap = env.update("PATH", (opt) => Bos.OS.Env.opt_var("PATH")); */
@@ -93,14 +92,11 @@ module Windows = {
             testWrite(jsonString);
             let commands = Bos.Cmd.to_list(command);
             let normalizedCommands = List.map(normalizePath, commands)
-            let cygwinCommand =
-
-                Bos.Cmd.of_list([
-                     /* TODO: Correct hardcoded paths! */
+            let cygwinCommand = Bos.Cmd.of_list([
                     "node",
                     "E:\\esy-bash\\bin\\esy-bash.js",
-                    "--path",
-                    pathValue,
+                    "--env",
+                    "E:/test-file.dat",
                     ...normalizedCommands,
                 ]);
                 /*Bos.Cmd.of_list([
@@ -110,8 +106,6 @@ module Windows = {
                     "echo $PATH",
                 ]); */
             print_endline("[DEBUG]: Running command: " ++ Bos.Cmd.to_string(cygwinCommand));
-            print_endline("[DEBUG]: PATH: " ++ pathValue);
-            print_endline("[DEBUG]: cur__bin: " ++ currBinValue);
             run_io(~err, cygwinCommand);
         };
         Ok(exec);

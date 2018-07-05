@@ -70,7 +70,7 @@ let create =
         /* let prefixPathLength = String.length(Fpath.to_string(prefixPath)); */
         /* let paddingLength = maxStorePaddingLength - prefixPathLength; */
         /* String.make(paddingLength, '_'); */
-          String.make(1, "_");
+          String.make(1, '_');
       };
       let storePath = prefixPath / (storeVersion ++ storePadding);
       let localStorePath =

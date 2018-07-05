@@ -14,7 +14,9 @@ let warn msg =
 
 let error msg =
   let line = Chalk.red("[ERR]") ^ " " ^ msg in
-  print_endline line
+  print_endline line;;
+
+print_endline "HELLO";;
 
 (**
  * This module encapsulates info about esy runtime - its version, current
@@ -47,6 +49,7 @@ module EsyRuntime = struct
 
   let resolveCommand req =
     let open RunAsync.Syntax in
+    print_endline("resolveCommand: " ^ req);
     let%bind path = resolve req in
     return (path |> Cmd.p)
 
@@ -627,7 +630,7 @@ let () =
     | Ok () -> `Ok ()
     | Error error ->
       let msg = Run.formatError error in
-      let msg = Printf.sprintf "error, exiting...\n%s" msg in
+      let msg = Printf.sprintf "error, exiting after esyCommand::runCommand...\n%s" msg in
       `Error (false, msg)
   in
 
@@ -692,6 +695,7 @@ let () =
     let doc = "Build the entire sandbox" in
     let info = Term.info "build" ~version:EsyRuntime.version ~doc ~sdocs ~exits in
     let cmd cfg cmd () =
+      Printf.printf("esyCommand::buildCommand Running build command");
       let header =
         match cmd with
         | None -> `Standard

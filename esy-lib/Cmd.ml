@@ -78,12 +78,15 @@ let resolveCmd path cmd =
       end
   in
   match cmd.[0] with
-  | '.'
-  | '/' -> Ok cmd
-  | _ -> resolve path
+  (* Temporarily remove the resolution here *)
+  (*| '.'*)
+  (* | '/' -> Ok cmd *)
+  (*| _ -> resolve path *)
+  | _ -> Ok cmd
 
 let resolveInvocation path (tool, args) =
   let open Result.Syntax in
+  let%bind _ = Ok (Printf.printf "Cmd::resolveInvocation %s\n" tool) in
   let%bind tool = resolveCmd path tool in
   return (tool, args)
 
