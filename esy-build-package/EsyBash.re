@@ -55,23 +55,32 @@ let normalizePathForCygwin = (path) => {
     }
 };
 
+let toEsyBashCommand = (cmd, ~env) => {
+    let environmentFilePath = switch (env) {
+        | None => []
+        | Some(fp) => ["--env", fp]
+    }
+
+    switch (System.host) {
+        | Windows => 
+            open Run;
+            let commands = Bos.Cmd.to_list(cmd);
+            let%bind esyBashPath = getEsyBashPath()
+            Bos.Cmd.of_list([
+                "node",
+                Fpath.to_string(esyBashPath),
+                ...environmentFilePath,
+                ...commands,
+            ]);
+        | _ => cmd
+}
+
 /**
  * Helper utility to run a command with 'esy-bash'.
  * On Windows, this runs the command in a Cygwin environment
  * On other platforms, this is equivalent to running the command directly with Bos.OS.Cmd.run
  */
 let run = (cmd) => {
-    switch (System.host) {
-        | Windows => 
-            open Run;
-            let commands = Bos.Cmd.to_list(cmd);
-            let%bind esyBashPath = getEsyBashPath()
-            let esyBashCommand = Bos.Cmd.of_list([
-                "node",
-                Fpath.to_string(esyBashPath),
-                ...commands,
-            ]);
-            Bos.OS.Cmd.run(esyBashCommand)
-        | _ => Bos.OS.Cmd.run(cmd)
-    };
+    let augmentedCommand = toEsyBashCommand(cmd)
+    Bos.OS.Cmd.run(augmentedCommand)
 };
