@@ -71,12 +71,14 @@ module Windows = {
             let json = BuildTask.Env.to_yojson(env);
             let jsonString = Yojson.to_string(json);
             testWrite(jsonString);
-            let commands = Bos.Cmd.to_list(command);
-            let normalizedCommands = List.map(normalizePath, commands)
-            let augmentedEsyCommand = EsyBash.toEsyBashCommand(normalizedCommands, fileToWrite)
+            /* let commands = Bos.Cmd.to_list(command); */
+            /* let normalizedCommands = List.map(normalizePath, commands); */
+            let%bind augmentedEsyCommand = EsyBash.toEsyBashCommand(command);
 
-            print_endline("[DEBUG]: Running command: " ++ Bos.Cmd.to_string(cygwinCommand));
-            run_io(~err, cygwinCommand);
+            /* print_endline("[DEBUG]: Running command: " ++ Bos.Cmd.to_string(augmentedEsyCommand)); */
+            Bos.OS.Cmd.run(augmentedEsyCommand);
+
+            /* run_io(~err, augmentedEsyCommand) */
         };
         Ok(exec);
     };
