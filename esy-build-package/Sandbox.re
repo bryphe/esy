@@ -51,6 +51,37 @@ module Darwin = {
   };
 };
 
+let fileToWrite = "E:/test-file.dat"
+
+let testWrite = (str: string) => {
+   let oc = open_out(fileToWrite);
+   Printf.fprintf(oc, "%s\n", str);
+   let _ = close_out(oc);
+};
+
+
+module Windows = {
+    let sandboxExec = config => {
+        open Run;
+        let exec = (~err, ~env, command) => {
+            /* let currBinValue = Astring.String.Map.get("cur__bin", env) */
+            /* Out_channel.write_all("test.txt", "Hello world!"); */
+            /* let updatedMap = env.update("PATH", (opt) => Bos.OS.Env.opt_var("PATH")); */
+            open Bos.OS.Cmd;
+            let json = BuildTask.Env.to_yojson(env);
+            let jsonString = Yojson.to_string(json);
+            testWrite(jsonString);
+            let commands = Bos.Cmd.to_list(command);
+            let normalizedCommands = List.map(normalizePath, commands)
+            let augmentedEsyCommand = EsyBash.toEsyBashCommand(normalizedCommands, fileToWrite)
+
+            print_endline("[DEBUG]: Running command: " ++ Bos.Cmd.to_string(cygwinCommand));
+            run_io(~err, cygwinCommand);
+        };
+        Ok(exec);
+    };
+}
+
 module NoSandbox = {
   let sandboxExec = _config => {
     let exec = (~err, ~env, command) =>
