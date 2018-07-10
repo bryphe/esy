@@ -197,6 +197,7 @@ end
 module PathLike = struct
 
   let make (name : string) (value : string list) =
+      print_endline("PathLike::make");
     let sep = match System.host, name with
       | System.Windows, _ -> ";"
       | System.Cygwin, "OCAMLPATH" -> ";"

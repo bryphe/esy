@@ -15,8 +15,8 @@ let renderCommandExpr ?name ~system ~scope expr =
     | System.Darwin
     | System.Linux
     | System.Unix
+    | System.Windows
     | System.Cygwin -> "/"
-    | System.Windows -> "\\"
   in
   let colon =
     match name, system with
@@ -26,6 +26,12 @@ let renderCommandExpr ?name ~system ~scope expr =
     | _, (System.Linux | System.Darwin | System.Unix | System.Unknown | System.Cygwin) -> ":"
     | _, System.Windows -> ";"
   in
+  let name2 =
+      match name with
+      | None -> "none"
+      | Some v -> v
+  in
+  print_endline("Task::renderCommandExpr - name: " ^ name2 ^ " pathSep: " ^ pathSep ^ " colon: " ^ colon);
   let scope name =
     match name with
     | None, "os" -> Some (CommandExpr.Value.String (System.toString system))
@@ -596,21 +602,21 @@ let ofPackage
             name = "PATH";
             value =
               let value = ConfigPath.(task.paths.installPath / "bin" |> toString) in
-              Value (value ^ ":$PATH")
+              Value (value ^ ";$PATH")
           }
           and manPath = Environment.{
             origin = Some task.pkg;
             name = "MAN_PATH";
             value =
               let value = ConfigPath.(task.paths.installPath / "bin" |> toString) in
-              Value (value ^ ":$MAN_PATH")
+              Value (value ^ ";$MAN_PATH")
           }
           and ocamlpath = Environment.{
             origin = Some task.pkg;
             name = "OCAMLPATH";
             value =
               let value = ConfigPath.(task.paths.installPath / "lib" |> toString) in
-              Value (value ^ ":$OCAMLPATH")
+              Value (value ^ ";$OCAMLPATH")
           } in
           path::manPath::ocamlpath::task.globalEnv
         in

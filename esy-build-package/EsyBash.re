@@ -16,7 +16,7 @@ let getEsyBashRootPath = () => {
 
   switch%bind (Run.coerceFrmMsgOnly(resolution)) {
     | Some(path) => Ok(Fpath.parent(path))
-    | None => Error(`Msg("Unable to find 'esy-bash'"))
+    | None => Error(`Msg("Unable to find 'esy-bash' TODO"))
   };
 };
 
@@ -95,5 +95,6 @@ let toEsyBashCommand = (cmd) => {
 let run = (cmd) => {
     open Run;
     let%bind augmentedCommand = toEsyBashCommand(cmd);
+    print_endline("EsyBash::run " ++ Bos.Cmd.to_string(cmd));
     Bos.OS.Cmd.run(augmentedCommand);
 };

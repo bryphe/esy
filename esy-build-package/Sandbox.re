@@ -59,6 +59,11 @@ let testWrite = (str: string) => {
    let _ = close_out(oc);
 };
 
+let regexp = Str.regexp("\\\\");
+let normalizePath = (p: string) => {
+    Str.global_replace(regexp, "/", p);
+};
+
 
 module Windows = {
     let sandboxExec = config => {
@@ -71,14 +76,23 @@ module Windows = {
             let json = BuildTask.Env.to_yojson(env);
             let jsonString = Yojson.to_string(json);
             testWrite(jsonString);
-            /* let commands = Bos.Cmd.to_list(command); */
-            /* let normalizedCommands = List.map(normalizePath, commands); */
-            let%bind augmentedEsyCommand = EsyBash.toEsyBashCommand(command);
+            let commands = Bos.Cmd.to_list(command);
+            let normalizedCommands = List.map(normalizePath, commands);
 
-            /* print_endline("[DEBUG]: Running command: " ++ Bos.Cmd.to_string(augmentedEsyCommand)); */
-            Bos.OS.Cmd.run(augmentedEsyCommand);
+            let updatedCommands = Bos.Cmd.of_list([
+                "node",
+                "E:/esy-bash/bin/esy-bash.js",
+                "--env",
+                fileToWrite,
+                ...normalizedCommands,
+            ]);
 
-            /* run_io(~err, augmentedEsyCommand) */
+            print_endline("[DEBUG]: Running command: " ++ Bos.Cmd.to_string(updatedCommands));
+            run_io(~err, updatedCommands);
+            /* Bos.OS.Cmd.run(augmentedEsyCommand); */
+
+            /* let%bind result = run_io(~err, augmentedEsyCommand); */
+/* result; */
         };
         Ok(exec);
     };
@@ -93,7 +107,8 @@ module NoSandbox = {
 };
 
 let sandboxExec = config =>
-  switch (Run.uname()) {
-  | "darwin" => Darwin.sandboxExec(config)
+  switch (EsyLib.System.host) {
+  |  Windows => Windows.sandboxExec(config)
+  |  Darwin => Darwin.sandboxExec(config)
   | _ => NoSandbox.sandboxExec(config)
   };
